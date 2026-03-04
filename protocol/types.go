@@ -42,12 +42,18 @@ type JSONRPCNotification struct {
 
 // --- Codex App Server 도메인 타입 ---
 
+// ClientInfo는 클라이언트 식별 정보이다.
+type ClientInfo struct {
+	// Name은 클라이언트 이름이다 (예: "autopus-bridge").
+	Name string `json:"name"`
+	// Version은 클라이언트 버전이다.
+	Version string `json:"version"`
+}
+
 // InitializeParams는 initialize 핸드셰이크 요청 파라미터이다.
 type InitializeParams struct {
-	// ClientName은 클라이언트 이름이다 (예: "autopus-bridge").
-	ClientName string `json:"clientName,omitempty"`
-	// ClientVersion은 클라이언트 버전이다.
-	ClientVersion string `json:"clientVersion,omitempty"`
+	// ClientInfo는 클라이언트 식별 정보이다.
+	ClientInfo ClientInfo `json:"clientInfo"`
 }
 
 // InitializeResult는 initialize 핸드셰이크 응답 결과이다.
@@ -58,14 +64,17 @@ type InitializeResult struct {
 	ServerVersion string `json:"serverVersion,omitempty"`
 }
 
-// AccountLoginParams는 account/login/start 요청 파라미터이다 (Bridge 네이밍 기준).
+// AccountLoginParams는 account/login/start 요청 파라미터이다.
+// oneOf: apiKey | chatgpt | chatgptAuthTokens
 type AccountLoginParams struct {
-	// Method는 인증 방식이다 ("apiKey", "chatgptAuthTokens").
-	Method string `json:"method"`
-	// APIKey는 API 키이다 (method가 "apiKey"일 때).
+	// Type은 인증 방식이다 ("apiKey", "chatgpt", "chatgptAuthTokens").
+	Type string `json:"type"`
+	// APIKey는 API 키이다 (type="apiKey"일 때 필수).
 	APIKey string `json:"apiKey,omitempty"`
-	// ChatGPTAuthTokens는 ChatGPT 인증 토큰이다.
-	ChatGPTAuthTokens string `json:"chatgptAuthTokens,omitempty"`
+	// AccessToken은 ChatGPT access_token이다 (type="chatgptAuthTokens"일 때 필수).
+	AccessToken string `json:"accessToken,omitempty"`
+	// ChatGPTAccountID는 ChatGPT 계정 ID이다 (type="chatgptAuthTokens"일 때 필수).
+	ChatGPTAccountID string `json:"chatgptAccountId,omitempty"`
 }
 
 // AccountLoginResult는 account/login/start 응답 결과이다.

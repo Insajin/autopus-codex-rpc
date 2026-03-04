@@ -252,10 +252,12 @@ func TestCodexDomainTypes(t *testing.T) {
 		}
 	})
 
-	t.Run("InitializeParams ClientName 포함", func(t *testing.T) {
+	t.Run("InitializeParams clientInfo 포함", func(t *testing.T) {
 		params := protocol.InitializeParams{
-			ClientName:    "autopus-bridge",
-			ClientVersion: "1.0.0",
+			ClientInfo: protocol.ClientInfo{
+				Name:    "autopus-bridge",
+				Version: "1.0.0",
+			},
 		}
 
 		data, err := json.Marshal(params)
@@ -263,19 +265,28 @@ func TestCodexDomainTypes(t *testing.T) {
 			t.Fatalf("직렬화 실패: %v", err)
 		}
 
+		// clientInfo 필드가 올바르게 직렬화되는지 확인
+		var raw map[string]interface{}
+		if err := json.Unmarshal(data, &raw); err != nil {
+			t.Fatalf("raw 역직렬화 실패: %v", err)
+		}
+		if _, ok := raw["clientInfo"]; !ok {
+			t.Error("clientInfo 필드가 있어야 하지만 존재하지 않음")
+		}
+
 		var decoded protocol.InitializeParams
 		if err := json.Unmarshal(data, &decoded); err != nil {
 			t.Fatalf("역직렬화 실패: %v", err)
 		}
 
-		if decoded.ClientName != "autopus-bridge" {
-			t.Errorf("ClientName 불일치: got %q, want %q", decoded.ClientName, "autopus-bridge")
+		if decoded.ClientInfo.Name != "autopus-bridge" {
+			t.Errorf("ClientInfo.Name 불일치: got %q, want %q", decoded.ClientInfo.Name, "autopus-bridge")
 		}
 	})
 
-	t.Run("AccountLoginParams 직렬화 (Bridge 네이밍)", func(t *testing.T) {
+	t.Run("AccountLoginParams 직렬화", func(t *testing.T) {
 		params := protocol.AccountLoginParams{
-			Method: "apiKey",
+			Type:   "apiKey",
 			APIKey: "sk-test-123",
 		}
 
@@ -289,8 +300,8 @@ func TestCodexDomainTypes(t *testing.T) {
 			t.Fatalf("역직렬화 실패: %v", err)
 		}
 
-		if decoded.Method != "apiKey" {
-			t.Errorf("Method 불일치: got %q, want %q", decoded.Method, "apiKey")
+		if decoded.Type != "apiKey" {
+			t.Errorf("Type 불일치: got %q, want %q", decoded.Type, "apiKey")
 		}
 		if decoded.APIKey != "sk-test-123" {
 			t.Errorf("APIKey 불일치: got %q, want %q", decoded.APIKey, "sk-test-123")
